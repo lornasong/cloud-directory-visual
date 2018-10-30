@@ -9,6 +9,9 @@ import (
 type Node struct {
 	FacetName  string
 	Attributes *[]Attribute
+	// TypedLinks
+	Parent   *Node
+	Children []*Node
 }
 
 // Attribute TODO:

@@ -38,12 +38,25 @@ func (v *Visual) DescribeObject(id string) (*Node, error) {
 		attributes[ix] = a
 	}
 
-	stuff := Node{
+	return &Node{
 		FacetName:  facetName,
 		Attributes: &attributes,
-	}
+	}, nil
+}
 
-	return &stuff, nil
+// FindObjectRelationships TODO:
+// n degrees of separation
+func (v *Visual) FindObjectRelationships(id string, n int) (*Node, error) {
+
+	// children
+
+	// parent(s)
+
+	// incoming typed links
+
+	// outgoing typed links
+
+	return &Node{}, nil
 }
 
 func valueString(value *clouddirectory.TypedAttributeValue) string {
