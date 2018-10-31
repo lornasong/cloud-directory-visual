@@ -7,6 +7,7 @@ import (
 
 // Node TODO:
 type Node struct {
+	ID         string
 	FacetName  string
 	Attributes *[]Attribute
 	// TypedLinks
@@ -26,7 +27,7 @@ func (a *Attribute) String() string {
 
 // String TODO:
 func (n *Node) String() string {
-	return fmt.Sprintf("FacetName: %s\nAttributes: %s\n", n.FacetName, n.AttributesString())
+	return fmt.Sprintf("ID: %s\nFacetName: %s\nAttributes: %s\n", n.ID, n.FacetName, n.AttributesString())
 }
 
 // AttributesString TODO:

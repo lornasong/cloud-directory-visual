@@ -39,6 +39,7 @@ func (v *Visual) DescribeObject(id string) (*Node, error) {
 	}
 
 	return &Node{
+		ID:         id,
 		FacetName:  facetName,
 		Attributes: &attributes,
 	}, nil
@@ -61,10 +62,10 @@ func (v *Visual) FindObjectRelationships(id string, n int) (*Node, error) {
 
 func valueString(value *clouddirectory.TypedAttributeValue) string {
 
-	if len(*value.StringValue) > 0 {
+	if value.StringValue != nil {
 		return *value.StringValue
 	}
-	if len(*value.NumberValue) > 0 {
+	if value.NumberValue != nil {
 		return *value.NumberValue
 	}
 	if len(value.BinaryValue) > 0 {
