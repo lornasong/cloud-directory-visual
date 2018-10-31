@@ -11,7 +11,7 @@ type Client interface {
 
 	// relationships
 	ListObjectChildren(*clouddirectory.ListObjectChildrenInput) (*clouddirectory.ListObjectChildrenOutput, error)
+	ListObjectParents(*clouddirectory.ListObjectParentsInput) (*clouddirectory.ListObjectParentsOutput, error)
 	ListIncomingTypedLinks(*clouddirectory.ListIncomingTypedLinksInput) (*clouddirectory.ListIncomingTypedLinksOutput, error)
 	ListOutgoingTypedLinks(*clouddirectory.ListOutgoingTypedLinksInput) (*clouddirectory.ListOutgoingTypedLinksOutput, error)
-	ListObjectParents(*clouddirectory.ListObjectParentsInput) (*clouddirectory.ListObjectParentsOutput, error)
 }
