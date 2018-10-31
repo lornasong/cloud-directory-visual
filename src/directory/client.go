@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/clouddirectory"
 )
 
-// Client TODO:
+// Client is the interface for AWS Cloud Directory
 type Client interface {
 	// obj
 	ListObjectAttributes(*clouddirectory.ListObjectAttributesInput) (*clouddirectory.ListObjectAttributesOutput, error)

@@ -7,14 +7,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/clouddirectory"
 )
 
-// Directory TODO:
+// Directory holds everything needed to access AWS Cloud Directory
 type Directory struct {
 	client    Client
 	arn       string
 	schemaArn string
 }
 
-// New TODO:
+// New returns a new Directory
 func New(client Client, arn, schemaArn string) *Directory {
 	return &Directory{
 		client:    client,
@@ -23,7 +23,7 @@ func New(client Client, arn, schemaArn string) *Directory {
 	}
 }
 
-// ListObjectAttributes TODO:
+// ListObjectAttributes retrieves a Cloud Directory's object's attributes
 func (d *Directory) ListObjectAttributes(id string) (*clouddirectory.ListObjectAttributesOutput, error) {
 	in := clouddirectory.ListObjectAttributesInput{
 		DirectoryArn:     aws.String(d.arn),
@@ -40,7 +40,7 @@ func (d *Directory) ListObjectAttributes(id string) (*clouddirectory.ListObjectA
 	return out, nil
 }
 
-// ListObjectChildren TODO:
+// ListObjectChildren retrieves a list of Cloud Directory's object's children
 func (d *Directory) ListObjectChildren(id string) (*clouddirectory.ListObjectChildrenOutput, error) {
 	in := clouddirectory.ListObjectChildrenInput{
 		DirectoryArn:     aws.String(d.arn),
@@ -57,7 +57,7 @@ func (d *Directory) ListObjectChildren(id string) (*clouddirectory.ListObjectChi
 	return out, nil
 }
 
-// ListObjectParents TODO:
+// ListObjectParents retrieves a list of Cloud Directory's object's parents
 func (d *Directory) ListObjectParents(id string) (*clouddirectory.ListObjectParentsOutput, error) {
 	in := clouddirectory.ListObjectParentsInput{
 		DirectoryArn:     aws.String(d.arn),
@@ -74,7 +74,7 @@ func (d *Directory) ListObjectParents(id string) (*clouddirectory.ListObjectPare
 	return out, nil
 }
 
-// ListIncomingTypedLinks TODO:
+// ListIncomingTypedLinks retrieves a list of Cloud Directory's object's incoming typed links
 func (d *Directory) ListIncomingTypedLinks(id string) (*clouddirectory.ListIncomingTypedLinksOutput, error) {
 	in := clouddirectory.ListIncomingTypedLinksInput{
 		DirectoryArn:     aws.String(d.arn),
@@ -91,7 +91,7 @@ func (d *Directory) ListIncomingTypedLinks(id string) (*clouddirectory.ListIncom
 	return out, nil
 }
 
-// ListOutgoingTypedLinks TODO:
+// ListOutgoingTypedLinks retrieves a list of Cloud Directory's object's outgoing typed links
 func (d *Directory) ListOutgoingTypedLinks(id string) (*clouddirectory.ListOutgoingTypedLinksOutput, error) {
 	in := clouddirectory.ListOutgoingTypedLinksInput{
 		DirectoryArn:     aws.String(d.arn),

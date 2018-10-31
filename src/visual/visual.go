@@ -7,19 +7,20 @@ import (
 	"github.com/lornasong/aws-cloud-directory-visual/src/directory"
 )
 
-// Visual TODO:
+// Visual handles everything needed to build a visualization
 type Visual struct {
 	dir *directory.Directory
 }
 
-// New TODO:
+// New returns a new Visual
 func New(d *directory.Directory) *Visual {
 	return &Visual{
 		dir: d,
 	}
 }
 
-// GenerateProfile TODO:
+// GenerateProfile returns a node fully hydrated with details about itself and
+// the nodes it has relationships with
 func (v *Visual) GenerateProfile(id string) (*Node, error) {
 	node, err := v.Describe(id)
 	if err != nil {
@@ -33,13 +34,13 @@ func (v *Visual) GenerateProfile(id string) (*Node, error) {
 	return node, nil
 }
 
-// Describe TODO:
+// Describe returns a node with basic information about itself
 func (v *Visual) Describe(id string) (*Node, error) {
 
-	// if selector, clear off $
-	if len(id) > 0 && id[0] == '$' {
-		id = id[1:]
+	if isSelector(id) {
+		id = selectorToID(id)
 	}
+
 	out, err := v.dir.ListObjectAttributes(id)
 	if err != nil {
 		return nil, err
@@ -64,21 +65,20 @@ func (v *Visual) Describe(id string) (*Node, error) {
 	}, nil
 }
 
-// FindRelationships TODO:
-// return identifier of all relationships
+// FindRelationships returns a node with information about the nodes it has
+// a direct relationship with: parent-child, typed-link.
 func (v *Visual) FindRelationships(node *Node) (*Node, error) {
-
 	cnodes, err := v.FindChildren(node.ID)
 	if err != nil {
 		return nil, err
 	}
 	node.Children = cnodes
 
-	pnode, err := v.FindParents(node.ID)
+	pnodes, err := v.FindParents(node.ID)
 	if err != nil {
 		return nil, err
 	}
-	node.Parent = pnode
+	node.Parent = pnodes
 
 	innodes, err := v.FindIncomingTypedLinks(node.ID)
 	if err != nil {
@@ -95,22 +95,15 @@ func (v *Visual) FindRelationships(node *Node) (*Node, error) {
 	return node, nil
 }
 
-// FindParents TODO:
-func (v *Visual) FindParents(id string) (*RelatedNode, error) {
-
-	// need to catch NotNodeException:
-
+// FindParents returns for the id of a node, its parent nodes
+func (v *Visual) FindParents(id string) ([]*RelatedNode, error) {
 	ps, err := v.dir.ListObjectParents(id)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(ps.Parents) > 1 {
-		fmt.Println("ERROR unexpected")
-		// FIXME: need error handling
-		return nil, nil
-	}
-
+	ix := 0
+	pnodes := make([]*RelatedNode, len(ps.Parents))
 	for pid, linkname := range ps.Parents {
 
 		pnode, err := v.Describe(pid)
@@ -118,20 +111,17 @@ func (v *Visual) FindParents(id string) (*RelatedNode, error) {
 			return nil, err
 		}
 
-		return &RelatedNode{
+		pnodes[ix] = &RelatedNode{
 			Node:     pnode,
 			Linkname: *linkname,
-		}, nil
+		}
+		ix++
 	}
-	// FIXME: need error handling? how should this be handled?
-	return nil, nil
+	return pnodes, nil
 }
 
-// FindChildren TODO:
+// FindChildren returns for the id of a node, its children nodes
 func (v *Visual) FindChildren(id string) ([]*RelatedNode, error) {
-
-	// need to catch NotNodeException:
-
 	cs, err := v.dir.ListObjectChildren(id)
 	if err != nil {
 		return nil, err
@@ -155,11 +145,8 @@ func (v *Visual) FindChildren(id string) ([]*RelatedNode, error) {
 	return cnodes, nil
 }
 
-// FindIncomingTypedLinks TODO:
+// FindIncomingTypedLinks returns for the id of a node, its incoming typed-link nodes
 func (v *Visual) FindIncomingTypedLinks(id string) ([]*LinkedNode, error) {
-
-	// need to catch NotNodeException:
-
 	ins, err := v.dir.ListIncomingTypedLinks(id)
 	if err != nil {
 		return nil, err
@@ -190,11 +177,8 @@ func (v *Visual) FindIncomingTypedLinks(id string) ([]*LinkedNode, error) {
 	return innodes, nil
 }
 
-// FindOutgoingTypedLinks TODO:
+// FindOutgoingTypedLinks returns for the id of a node, its outgoing typed-link nodes
 func (v *Visual) FindOutgoingTypedLinks(id string) ([]*LinkedNode, error) {
-
-	// need to catch NotNodeException:
-
 	outs, err := v.dir.ListOutgoingTypedLinks(id)
 	if err != nil {
 		return nil, err
@@ -223,6 +207,19 @@ func (v *Visual) FindOutgoingTypedLinks(id string) ([]*LinkedNode, error) {
 		ix++
 	}
 	return outnodes, nil
+}
+
+// isSelector checks if an id is a selector (id with '$' preprended)
+func isSelector(id string) bool {
+	return len(id) > 0 && id[0] == '$'
+}
+
+// selectorToID converts a selector to an id (removes prepended '$')
+func selectorToID(selector string) string {
+	if len(selector) > 1 {
+		return selector[1:]
+	}
+	return ""
 }
 
 func valueString(value *clouddirectory.TypedAttributeValue) string {
