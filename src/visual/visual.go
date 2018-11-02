@@ -3,6 +3,10 @@ package visual
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
+
+	"github.com/pkg/errors"
+
 	"github.com/aws/aws-sdk-go/service/clouddirectory"
 	"github.com/lornasong/aws-cloud-directory-visual/src/directory"
 )
@@ -24,12 +28,12 @@ func New(d *directory.Directory) *Visual {
 func (v *Visual) GenerateProfile(id string) (*Node, error) {
 	node, err := v.Describe(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to describe node %s", id)
 	}
 
 	node, err = v.FindRelationships(node)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to find relationships of node: %s", id)
 	}
 	return node, nil
 }
@@ -43,7 +47,7 @@ func (v *Visual) Describe(id string) (*Node, error) {
 
 	out, err := v.dir.ListObjectAttributes(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to ListObjectAttributes")
 	}
 
 	facetName := ""
@@ -99,7 +103,7 @@ func (v *Visual) FindRelationships(node *Node) (*Node, error) {
 func (v *Visual) FindParents(id string) ([]*RelatedNode, error) {
 	ps, err := v.dir.ListObjectParents(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to ListObjectParents")
 	}
 
 	ix := 0
@@ -108,7 +112,7 @@ func (v *Visual) FindParents(id string) ([]*RelatedNode, error) {
 
 		pnode, err := v.Describe(pid)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "failed to Describe parent %s", pid)
 		}
 
 		pnodes[ix] = &RelatedNode{
@@ -124,16 +128,22 @@ func (v *Visual) FindParents(id string) ([]*RelatedNode, error) {
 func (v *Visual) FindChildren(id string) ([]*RelatedNode, error) {
 	cs, err := v.dir.ListObjectChildren(id)
 	if err != nil {
-		return nil, err
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case clouddirectory.ErrCodeNotNodeException:
+				return []*RelatedNode{}, nil
+			}
+		}
+		return nil, errors.Wrap(err, "failed to ListObjectChildren")
 	}
 
-	cnodes := make([]*RelatedNode, len(cs.Children))
 	ix := 0
+	cnodes := make([]*RelatedNode, len(cs.Children))
 	for linkname, cid := range cs.Children {
 
 		cnode, err := v.Describe(*cid)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "failed to Describe child %s", *cid)
 		}
 
 		cnodes[ix] = &RelatedNode{
@@ -149,16 +159,16 @@ func (v *Visual) FindChildren(id string) ([]*RelatedNode, error) {
 func (v *Visual) FindIncomingTypedLinks(id string) ([]*LinkedNode, error) {
 	ins, err := v.dir.ListIncomingTypedLinks(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to ListIncomingTypedLinks")
 	}
 
-	innodes := make([]*LinkedNode, len(ins.LinkSpecifiers))
 	ix := 0
+	innodes := make([]*LinkedNode, len(ins.LinkSpecifiers))
 	for _, link := range ins.LinkSpecifiers {
 		// only care about source. the id is the target (incoming)
 		innode, err := v.Describe(*link.SourceObjectReference.Selector)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "failed to Describe source %s", *link.SourceObjectReference.Selector)
 		}
 
 		attrs := make([]*Attribute, len(link.IdentityAttributeValues))
@@ -181,16 +191,16 @@ func (v *Visual) FindIncomingTypedLinks(id string) ([]*LinkedNode, error) {
 func (v *Visual) FindOutgoingTypedLinks(id string) ([]*LinkedNode, error) {
 	outs, err := v.dir.ListOutgoingTypedLinks(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to ListOutgoingTypedLinks")
 	}
 
-	outnodes := make([]*LinkedNode, len(outs.TypedLinkSpecifiers))
 	ix := 0
+	outnodes := make([]*LinkedNode, len(outs.TypedLinkSpecifiers))
 	for _, link := range outs.TypedLinkSpecifiers {
 		// only care about target. the id is the source (outgoing)
 		outnode, err := v.Describe(*link.TargetObjectReference.Selector)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "failed to Describe target %s", *link.TargetObjectReference.Selector)
 		}
 
 		attrs := make([]*Attribute, len(link.IdentityAttributeValues))
