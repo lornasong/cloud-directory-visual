@@ -24,12 +24,17 @@ func New(client Client, arn, schemaArn string) *Directory {
 }
 
 // ListObjectAttributes returns a Cloud Directory's object's attributes
-func (d *Directory) ListObjectAttributes(id string) (*clouddirectory.ListObjectAttributesOutput, error) {
+func (d *Directory) ListObjectAttributes(ref string) (*clouddirectory.ListObjectAttributesOutput, error) {
+	id := ref
+	if !isPath(ref) {
+		id = fmt.Sprintf("$%s", id)
+	}
+
 	in := clouddirectory.ListObjectAttributesInput{
 		DirectoryArn:     aws.String(d.arn),
 		ConsistencyLevel: aws.String(clouddirectory.ConsistencyLevelEventual),
 		ObjectReference: &clouddirectory.ObjectReference{
-			Selector: aws.String(fmt.Sprintf("$%s", id)),
+			Selector: aws.String(id),
 		},
 	}
 
@@ -41,12 +46,17 @@ func (d *Directory) ListObjectAttributes(id string) (*clouddirectory.ListObjectA
 }
 
 // ListObjectChildren returns a list of Cloud Directory's object's children
-func (d *Directory) ListObjectChildren(id string) (*clouddirectory.ListObjectChildrenOutput, error) {
+func (d *Directory) ListObjectChildren(ref string) (*clouddirectory.ListObjectChildrenOutput, error) {
+	id := ref
+	if !isPath(ref) {
+		id = fmt.Sprintf("$%s", id)
+	}
+
 	in := clouddirectory.ListObjectChildrenInput{
 		DirectoryArn:     aws.String(d.arn),
 		ConsistencyLevel: aws.String(clouddirectory.ConsistencyLevelEventual),
 		ObjectReference: &clouddirectory.ObjectReference{
-			Selector: aws.String(fmt.Sprintf("$%s", id)),
+			Selector: aws.String(id),
 		},
 	}
 
@@ -58,12 +68,17 @@ func (d *Directory) ListObjectChildren(id string) (*clouddirectory.ListObjectChi
 }
 
 // ListObjectParents returns a list of Cloud Directory's object's parents
-func (d *Directory) ListObjectParents(id string) (*clouddirectory.ListObjectParentsOutput, error) {
+func (d *Directory) ListObjectParents(ref string) (*clouddirectory.ListObjectParentsOutput, error) {
+	id := ref
+	if !isPath(ref) {
+		id = fmt.Sprintf("$%s", id)
+	}
+
 	in := clouddirectory.ListObjectParentsInput{
 		DirectoryArn:     aws.String(d.arn),
 		ConsistencyLevel: aws.String(clouddirectory.ConsistencyLevelEventual),
 		ObjectReference: &clouddirectory.ObjectReference{
-			Selector: aws.String(fmt.Sprintf("$%s", id)),
+			Selector: aws.String(id),
 		},
 	}
 
@@ -75,12 +90,17 @@ func (d *Directory) ListObjectParents(id string) (*clouddirectory.ListObjectPare
 }
 
 // ListIncomingTypedLinks returns a list of Cloud Directory's object's incoming typed links
-func (d *Directory) ListIncomingTypedLinks(id string) (*clouddirectory.ListIncomingTypedLinksOutput, error) {
+func (d *Directory) ListIncomingTypedLinks(ref string) (*clouddirectory.ListIncomingTypedLinksOutput, error) {
+	id := ref
+	if !isPath(ref) {
+		id = fmt.Sprintf("$%s", id)
+	}
+
 	in := clouddirectory.ListIncomingTypedLinksInput{
 		DirectoryArn:     aws.String(d.arn),
 		ConsistencyLevel: aws.String(clouddirectory.ConsistencyLevelEventual),
 		ObjectReference: &clouddirectory.ObjectReference{
-			Selector: aws.String(fmt.Sprintf("$%s", id)),
+			Selector: aws.String(id),
 		},
 	}
 
@@ -92,12 +112,17 @@ func (d *Directory) ListIncomingTypedLinks(id string) (*clouddirectory.ListIncom
 }
 
 // ListOutgoingTypedLinks returns a list of Cloud Directory's object's outgoing typed links
-func (d *Directory) ListOutgoingTypedLinks(id string) (*clouddirectory.ListOutgoingTypedLinksOutput, error) {
+func (d *Directory) ListOutgoingTypedLinks(ref string) (*clouddirectory.ListOutgoingTypedLinksOutput, error) {
+	id := ref
+	if !isPath(ref) {
+		id = fmt.Sprintf("$%s", id)
+	}
+
 	in := clouddirectory.ListOutgoingTypedLinksInput{
 		DirectoryArn:     aws.String(d.arn),
 		ConsistencyLevel: aws.String(clouddirectory.ConsistencyLevelEventual),
 		ObjectReference: &clouddirectory.ObjectReference{
-			Selector: aws.String(fmt.Sprintf("$%s", id)),
+			Selector: aws.String(id),
 		},
 	}
 
@@ -109,12 +134,17 @@ func (d *Directory) ListOutgoingTypedLinks(id string) (*clouddirectory.ListOutgo
 }
 
 // ListPolicyAttachments returns a CloudDirectory's policy's list of object ids it's attached to.
-func (d *Directory) ListPolicyAttachments(id string) (*clouddirectory.ListPolicyAttachmentsOutput, error) {
+func (d *Directory) ListPolicyAttachments(ref string) (*clouddirectory.ListPolicyAttachmentsOutput, error) {
+	id := ref
+	if !isPath(ref) {
+		id = fmt.Sprintf("$%s", id)
+	}
+
 	in := clouddirectory.ListPolicyAttachmentsInput{
 		DirectoryArn:     aws.String(d.arn),
 		ConsistencyLevel: aws.String(clouddirectory.ConsistencyLevelEventual),
 		PolicyReference: &clouddirectory.ObjectReference{
-			Selector: aws.String(fmt.Sprintf("$%s", id)),
+			Selector: aws.String(id),
 		},
 	}
 
@@ -126,12 +156,17 @@ func (d *Directory) ListPolicyAttachments(id string) (*clouddirectory.ListPolicy
 }
 
 // ListObjectPolicies returns a CloudDirectory's object's list of attached policies ids.
-func (d *Directory) ListObjectPolicies(id string) (*clouddirectory.ListObjectPoliciesOutput, error) {
+func (d *Directory) ListObjectPolicies(ref string) (*clouddirectory.ListObjectPoliciesOutput, error) {
+	id := ref
+	if !isPath(ref) {
+		id = fmt.Sprintf("$%s", id)
+	}
+
 	in := clouddirectory.ListObjectPoliciesInput{
 		DirectoryArn:     aws.String(d.arn),
 		ConsistencyLevel: aws.String(clouddirectory.ConsistencyLevelEventual),
 		ObjectReference: &clouddirectory.ObjectReference{
-			Selector: aws.String(fmt.Sprintf("$%s", id)),
+			Selector: aws.String(id),
 		},
 	}
 
@@ -142,3 +177,6 @@ func (d *Directory) ListObjectPolicies(id string) (*clouddirectory.ListObjectPol
 	return out, nil
 }
 
+func isPath(ref string) bool {
+	return len(ref) > 0 && ref[0] == '/'
+}
