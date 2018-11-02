@@ -4,11 +4,9 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
-
-	"github.com/pkg/errors"
-
 	"github.com/aws/aws-sdk-go/service/clouddirectory"
 	"github.com/lornasong/aws-cloud-directory-visual/src/directory"
+	"github.com/pkg/errors"
 )
 
 // Visual handles everything needed to build a visualization
@@ -115,6 +113,12 @@ func (v *Visual) FindRelationships(node *Node) (*Node, error) {
 func (v *Visual) FindParents(id string) ([]*RelatedNode, error) {
 	ps, err := v.dir.ListObjectParents(id)
 	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case clouddirectory.ErrCodeCannotListParentOfRootException:
+				return []*RelatedNode{}, nil
+			}
+		}
 		return nil, errors.Wrapf(err, "failed to ListObjectParents")
 	}
 
