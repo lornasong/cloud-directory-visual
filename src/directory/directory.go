@@ -23,7 +23,7 @@ func New(client Client, arn, schemaArn string) *Directory {
 	}
 }
 
-// ListObjectAttributes retrieves a Cloud Directory's object's attributes
+// ListObjectAttributes returns a Cloud Directory's object's attributes
 func (d *Directory) ListObjectAttributes(id string) (*clouddirectory.ListObjectAttributesOutput, error) {
 	in := clouddirectory.ListObjectAttributesInput{
 		DirectoryArn:     aws.String(d.arn),
@@ -40,7 +40,7 @@ func (d *Directory) ListObjectAttributes(id string) (*clouddirectory.ListObjectA
 	return out, nil
 }
 
-// ListObjectChildren retrieves a list of Cloud Directory's object's children
+// ListObjectChildren returns a list of Cloud Directory's object's children
 func (d *Directory) ListObjectChildren(id string) (*clouddirectory.ListObjectChildrenOutput, error) {
 	in := clouddirectory.ListObjectChildrenInput{
 		DirectoryArn:     aws.String(d.arn),
@@ -57,7 +57,7 @@ func (d *Directory) ListObjectChildren(id string) (*clouddirectory.ListObjectChi
 	return out, nil
 }
 
-// ListObjectParents retrieves a list of Cloud Directory's object's parents
+// ListObjectParents returns a list of Cloud Directory's object's parents
 func (d *Directory) ListObjectParents(id string) (*clouddirectory.ListObjectParentsOutput, error) {
 	in := clouddirectory.ListObjectParentsInput{
 		DirectoryArn:     aws.String(d.arn),
@@ -74,7 +74,7 @@ func (d *Directory) ListObjectParents(id string) (*clouddirectory.ListObjectPare
 	return out, nil
 }
 
-// ListIncomingTypedLinks retrieves a list of Cloud Directory's object's incoming typed links
+// ListIncomingTypedLinks returns a list of Cloud Directory's object's incoming typed links
 func (d *Directory) ListIncomingTypedLinks(id string) (*clouddirectory.ListIncomingTypedLinksOutput, error) {
 	in := clouddirectory.ListIncomingTypedLinksInput{
 		DirectoryArn:     aws.String(d.arn),
@@ -91,7 +91,7 @@ func (d *Directory) ListIncomingTypedLinks(id string) (*clouddirectory.ListIncom
 	return out, nil
 }
 
-// ListOutgoingTypedLinks retrieves a list of Cloud Directory's object's outgoing typed links
+// ListOutgoingTypedLinks returns a list of Cloud Directory's object's outgoing typed links
 func (d *Directory) ListOutgoingTypedLinks(id string) (*clouddirectory.ListOutgoingTypedLinksOutput, error) {
 	in := clouddirectory.ListOutgoingTypedLinksInput{
 		DirectoryArn:     aws.String(d.arn),
@@ -107,3 +107,38 @@ func (d *Directory) ListOutgoingTypedLinks(id string) (*clouddirectory.ListOutgo
 	}
 	return out, nil
 }
+
+// ListPolicyAttachments returns a CloudDirectory's policy's list of object ids it's attached to.
+func (d *Directory) ListPolicyAttachments(id string) (*clouddirectory.ListPolicyAttachmentsOutput, error) {
+	in := clouddirectory.ListPolicyAttachmentsInput{
+		DirectoryArn:     aws.String(d.arn),
+		ConsistencyLevel: aws.String(clouddirectory.ConsistencyLevelEventual),
+		PolicyReference: &clouddirectory.ObjectReference{
+			Selector: aws.String(fmt.Sprintf("$%s", id)),
+		},
+	}
+
+	out, err := d.client.ListPolicyAttachments(&in)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ListObjectPolicies returns a CloudDirectory's object's list of attached policies ids.
+func (d *Directory) ListObjectPolicies(id string) (*clouddirectory.ListObjectPoliciesOutput, error) {
+	in := clouddirectory.ListObjectPoliciesInput{
+		DirectoryArn:     aws.String(d.arn),
+		ConsistencyLevel: aws.String(clouddirectory.ConsistencyLevelEventual),
+		ObjectReference: &clouddirectory.ObjectReference{
+			Selector: aws.String(fmt.Sprintf("$%s", id)),
+		},
+	}
+
+	out, err := d.client.ListObjectPolicies(&in)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+

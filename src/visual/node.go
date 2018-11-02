@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// Node holds information about a node and nodes it has an immediate relationship with
+// Node holds information about a node and its immediate relationships
 type Node struct {
 	ID                 string
 	FacetName          string
@@ -13,6 +13,8 @@ type Node struct {
 	Children           []*RelatedNode
 	OutgoingTypedLinks []*LinkedNode
 	IncomingTypedLinks []*LinkedNode
+	AttachedPolicies   []*AttachedNode
+	AttachedObjects    []*AttachedNode
 }
 
 func (n *Node) String() string {
@@ -21,8 +23,12 @@ func (n *Node) String() string {
 
 // FullString returns full information about a node
 func (n *Node) FullString() string {
-	desc := "ID: %s, FacetName: %s\nAttributes: %s\nParent: %v\nChildren: %v\nIncoming Typed Links: %v\nOutgoingTypedLinks: %v"
-	return fmt.Sprintf(desc, n.ID, n.FacetName, n.Attributes, n.Parent, n.Children, n.IncomingTypedLinks, n.OutgoingTypedLinks)
+	desc := "ID: %s, FacetName: %s\nAttributes: %s\n" +
+		"Parent: %v\nChildren: %v\n" +
+		"Incoming Typed Links: %v\nOutgoingTypedLinks: %v\n" +
+		"Attached Policies: %v\nAttached Objects: %v"
+	return fmt.Sprintf(desc, n.ID, n.FacetName, n.Attributes, n.Parent, n.Children,
+		n.IncomingTypedLinks, n.OutgoingTypedLinks, n.AttachedPolicies, n.AttachedObjects)
 }
 
 // Attribute is a key value pair of information
@@ -45,14 +51,13 @@ func (n *RelatedNode) String() string {
 	return fmt.Sprintf("{Linkname: %s, Node: %s}", n.Linkname, n.Node)
 }
 
-// AttachedNode holds a node and its relationship to another node
+// AttachedNode holds a node that is attached usually via policy attachments
 type AttachedNode struct {
-	Node         *Node
-	Relationship string
+	Node *Node
 }
 
 func (n *AttachedNode) String() string {
-	return fmt.Sprintf("{Relationship: %s, Node: %s}", n.Relationship, n.Node)
+	return fmt.Sprintf("{Node: %s}", n.Node)
 }
 
 // LinkedNode holds a node and the attributes tied to the relationship with another node

@@ -96,6 +96,18 @@ func (v *Visual) FindRelationships(node *Node) (*Node, error) {
 	}
 	node.OutgoingTypedLinks = outnodes
 
+	ponodes, err := v.FindPolicies(node.ID)
+	if err != nil {
+		return nil, err
+	}
+	node.AttachedPolicies = ponodes
+
+	panodes, err := v.FindPolicyAttachments(node.ID)
+	if err != nil {
+		return nil, err
+	}
+	node.AttachedObjects = panodes
+
 	return node, nil
 }
 
@@ -217,6 +229,58 @@ func (v *Visual) FindOutgoingTypedLinks(id string) ([]*LinkedNode, error) {
 		ix++
 	}
 	return outnodes, nil
+}
+
+// FindPolicyAttachments returns for the id of a policy node, the objects that are attached to it.
+func (v *Visual) FindPolicyAttachments(id string) ([]*AttachedNode, error) {
+	objs, err := v.dir.ListPolicyAttachments(id)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case clouddirectory.ErrCodeNotPolicyException:
+				return []*AttachedNode{}, nil
+			}
+		}
+		return nil, errors.Wrap(err, "failed to ListPolicyAttachments")
+	}
+
+	ix := 0
+	objnodes := make([]*AttachedNode, len(objs.ObjectIdentifiers))
+	for _, id := range objs.ObjectIdentifiers {
+		objnode, err := v.Describe(*id)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to Describe attached obj %s", *id)
+		}
+
+		objnodes[ix] = &AttachedNode{
+			Node: objnode,
+		}
+		ix++
+	}
+	return objnodes, nil
+}
+
+// FindPolicies returns for the id of a policy node, the objects that are attached to it.
+func (v *Visual) FindPolicies(id string) ([]*AttachedNode, error) {
+	objs, err := v.dir.ListObjectPolicies(id)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to ListObjectPolicies")
+	}
+
+	ix := 0
+	objnodes := make([]*AttachedNode, len(objs.AttachedPolicyIds))
+	for _, id := range objs.AttachedPolicyIds {
+		objnode, err := v.Describe(*id)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to Describe attached policies %s", *id)
+		}
+
+		objnodes[ix] = &AttachedNode{
+			Node: objnode,
+		}
+		ix++
+	}
+	return objnodes, nil
 }
 
 // isSelector checks if an id is a selector (id with '$' preprended)
