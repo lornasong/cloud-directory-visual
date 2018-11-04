@@ -2,49 +2,39 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/clouddirectory"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo"
-	"github.com/lornasong/aws-cloud-directory-visual/src/directory"
 	"github.com/lornasong/aws-cloud-directory-visual/src/visual"
-	"github.com/pkg/errors"
 )
 
-// Visualize TODO:
-func Visualize(ctx echo.Context) error {
-	c, err := loadConfig()
-	if err != nil {
-		log.Fatalf("Failed to load config: %s", err)
+const (
+	rootNodeID = "/"
+)
+
+// FindRoot returns the node profile for the root node
+func FindRoot(v *visual.Visual) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		out, err := v.GenerateProfile(rootNodeID)
+		if err != nil {
+			fmt.Printf("Error: %+v\n", err)
+			return ctx.JSON(http.StatusInternalServerError, err)
+		}
+
+		return ctx.JSON(http.StatusOK, out)
 	}
-
-	sess := session.Must(session.NewSession())
-	client := clouddirectory.New(sess)
-	dir := directory.New(client, c.CloudDirectoryArn, c.CloudDirectorySchemaArn)
-	v := visual.New(dir)
-
-	out, err := v.GenerateProfile("/")
-	if err != nil {
-		fmt.Printf("Error: %+v\n", err)
-		return ctx.JSON(http.StatusInternalServerError, err)
-	}
-
-	return ctx.JSON(http.StatusOK, out)
 }
 
-type config struct {
-	CloudDirectoryArn       string `split_words:"true" required:"true"`
-	CloudDirectorySchemaArn string `split_words:"true" required:"true"`
-}
+// Find returns the node profile for the id specified
+func Find(v *visual.Visual) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		id := ctx.Param("id")
+		out, err := v.GenerateProfile(id)
+		if err != nil {
+			fmt.Printf("Error: %+v\n", err)
+			return ctx.JSON(http.StatusInternalServerError, err)
+		}
 
-func loadConfig() (*config, error) {
-	var c config
-	err := envconfig.Process("AWS", &c)
-	if err != nil {
-		return nil, errors.Wrap(err, "error loading config")
+		return ctx.JSON(http.StatusOK, out)
 	}
-	return &c, nil
 }
