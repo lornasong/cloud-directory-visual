@@ -1,49 +1,39 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/clouddirectory"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo"
 	"github.com/lornasong/aws-cloud-directory-visual/src/directory"
 	"github.com/lornasong/aws-cloud-directory-visual/src/handlers"
 	"github.com/lornasong/aws-cloud-directory-visual/src/visual"
-	"github.com/pkg/errors"
 )
 
 func main() {
+	cdArn := flag.String("arn", "", "aws cloud directory arn")
+	cdSchemaArn := flag.String("schemaArn", "", "aws cloud directory schema arn")
+	flag.Parse()
 
-	e := echo.New()
+	if len(*cdArn) == 0 {
+		log.Fatal("Error: missing required value for command-line flag '-arn=$(AWS_CLOUD_DIRECTORY_ARN)'")
+	}
 
-	c, err := loadConfig()
-	if err != nil {
-		log.Fatalf("Failed to load config: %s", err)
+	if len(*cdSchemaArn) == 0 {
+		log.Fatal("Error: missing required value for command-line flag '-schemaArn=$(AWS_CLOUD_DIRECTORY_SCHEMA_ARN)'")
 	}
 
 	sess := session.Must(session.NewSession())
 	client := clouddirectory.New(sess)
-	dir := directory.New(client, c.CloudDirectoryArn, c.CloudDirectorySchemaArn)
+	dir := directory.New(client, *cdArn, *cdSchemaArn)
 	v := visual.New(dir)
 
+	e := echo.New()
 	e.Static("/static", "node_modules")
 	e.File("/", "public/index.html")
 	e.GET("/find", handlers.FindRoot(v))
 	e.GET("/find/:id", handlers.Find(v))
 	e.Start(":8000")
-}
-
-type config struct {
-	CloudDirectoryArn       string `split_words:"true" required:"true"`
-	CloudDirectorySchemaArn string `split_words:"true" required:"true"`
-}
-
-func loadConfig() (*config, error) {
-	var c config
-	err := envconfig.Process("AWS", &c)
-	if err != nil {
-		return nil, errors.Wrap(err, "error loading config")
-	}
-	return &c, nil
 }

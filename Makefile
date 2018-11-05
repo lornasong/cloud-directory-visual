@@ -15,6 +15,6 @@ local-build:
 	@go build -o build/$(PROJECT) ./cmd/$(PROJECT);
 
 run: local-build
-	./build/$(PROJECT)
+	./build/$(PROJECT) -arn=$(AWS_CLOUD_DIRECTORY_ARN) -schemaArn=$(AWS_CLOUD_DIRECTORY_SCHEMA_ARN)
 
 .PHONY: default test dep build local-build run
