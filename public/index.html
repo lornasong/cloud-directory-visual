@@ -1,0 +1,320 @@
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <title>Visualize AWS CD</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+    <!-- JQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <!-- Vue.js -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/0.7.0/vue-resource.min.js"></script>
+
+    <!-- Viz.js -->
+    <script type="text/javascript" src="static/vis/dist/vis.js"></script>
+    <link href="static/vis/dist/vis.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        #graph-visual {
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h2>Cloud Directory</h2>
+            </div>
+            <div class="col-md-12">
+                <div id="graph-visual"></div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script>
+    new Vue({
+        el: 'body',
+
+        data: {
+            graph: {},
+            nodes: {},
+            edges: {},
+            http: {}
+        },
+
+        init: function () {
+            this.$http.get('/find').then(function (
+                response) {
+                http = this.$http // TODO: fix this
+                this.nodes = new vis.DataSet([])
+                this.edges = new vis.DataSet([])
+                this.updateGraphData(response.data)
+                this.initVisual()
+            })
+        },
+        methods: {
+            findName: function (node) {
+                for (var ix in node.Attributes) {
+                    var attr = node.Attributes[ix];
+                    if (attr.Key === 'name') {
+                        return attr.Value;
+                    }
+                }
+                return "Unknown";
+            },
+            makeTitle: function (node) {
+                return node.FacetName + " ID: " + node.ID;
+            },
+            makeAttributeLabel: function (attributes) {
+                var label = '';
+                for (var ix in attributes) {
+                    if (label.length > 0) {
+                        label += '\n';
+                    }
+                    var attr = attributes[ix];
+                    label += attr.Key + ':' + attr.Value;
+                }
+                return label
+            },
+            updateGraphData: function (node) {
+                console.log(node)
+
+                if (!this.nodes.get(node.ID)) {
+                    this.nodes.add({
+                        id: node.ID,
+                        title: this.makeTitle(node),
+                        label: this.findName(node),
+                    });
+                }
+
+                // parent relationship
+                for (var ix in node.Parent) {
+                    var relationship = node.Parent[ix]
+
+                    var pnode = relationship.Node
+
+                    if (this.nodes.get(pnode.ID)) {
+                        continue;
+                    }
+
+                    this.nodes.add({
+                        id: pnode.ID,
+                        title: this.makeTitle(pnode),
+                        label: this.findName(pnode),
+                    });
+                    this.edges.add({
+                        from: pnode.ID,
+                        to: node.ID,
+                        arrows: 'to',
+                        label: relationship.Linkname,
+                        color: {
+                            color: 'gray',
+                        },
+                        font: {
+                            color: 'black',
+                        },
+                        smooth: {
+                            enabled: false,
+                        }
+                    });
+                }
+
+                // child relationship
+                for (var ix in node.Children) {
+                    var relationship = node.Children[ix]
+                    var cnode = relationship.Node
+
+                    if (this.nodes.get(cnode.ID)) {
+                        continue;
+                    }
+
+                    this.nodes.add({
+                        id: cnode.ID,
+                        title: this.makeTitle(cnode),
+                        label: this.findName(cnode),
+                    });
+                    this.edges.add({
+                        from: node.ID,
+                        to: cnode.ID,
+                        arrows: 'to',
+                        label: relationship.Linkname,
+                        color: {
+                            color: 'gray',
+                        },
+                        font: {
+                            color: 'black',
+                        },
+                        smooth: {
+                            enabled: false,
+                        }
+                    });
+                }
+
+                // incoming typed links relationship
+                for (var ix in node.IncomingTypedLinks) {
+                    var relationship = node.IncomingTypedLinks[ix]
+                    var innode = relationship.Node
+
+                    if (this.nodes.get(innode.ID)) {
+                        continue;
+                    }
+
+                    this.nodes.add({
+                        id: innode.ID,
+                        title: this.makeTitle(innode),
+                        label: this.findName(innode),
+                    });
+                    this.edges.add({
+                        from: innode.ID,
+                        to: node.ID,
+                        arrows: 'to',
+                        label: this.makeAttributeLabel(relationship.Attributes),
+                        dashes: 'true',
+                        color: {
+                            color: 'black',
+                        },
+                        font: {
+                            color: 'black',
+                        },
+                        smooth: {
+                            enabled: false,
+                        }
+                    });
+                }
+
+                // outgoing typed links relationship
+                for (var ix in node.OutgoingTypedLinks) {
+                    var relationship = node.OutgoingTypedLinks[ix]
+                    var outnode = relationship.Node
+
+                    if (this.nodes.get(outnode.ID)) {
+                        continue;
+                    }
+
+                    this.nodes.add({
+                        id: outnode.ID,
+                        title: this.makeTitle(outnode),
+                        label: this.findName(outnode),
+                    });
+                    this.edges.add({
+                        from: node.ID,
+                        to: outnode.ID,
+                        arrows: 'to',
+                        label: this.makeAttributeLabel(relationship.Attributes),
+                        dashes: 'true',
+                        color: {
+                            color: 'black',
+                        },
+                        font: {
+                            color: 'black',
+                        },
+                        smooth: {
+                            enabled: false,
+                        }
+                    });
+                }
+
+                // attached policies
+                for (var ix in node.AttachedPolicies) {
+                    var policy = node.AttachedPolicies[ix].Node
+
+                    if (this.nodes.get(policy.ID)) {
+                        continue;
+                    }
+
+                    this.nodes.add({
+                        id: policy.ID,
+                        title: this.makeTitle(policy),
+                        label: this.findName(policy),
+                    });
+                    this.edges.add({
+                        from: policy.ID,
+                        to: node.ID,
+                        arrows: 'to',
+                        color: {
+                            color: 'blue',
+                        },
+                        smooth: {
+                            enabled: false,
+                        }
+                    });
+                }
+
+                // attached obj
+                for (var ix in node.AttachedObjects) {
+                    var objnode = node.AttachedObjects[ix].Node
+
+                    if (this.nodes.get(objnode.ID)) {
+                        continue;
+                    }
+
+                    this.nodes.add({
+                        id: objnode.ID,
+                        title: this.makeTitle(objnode),
+                        label: this.findName(objnode),
+                    });
+                    this.edges.add({
+                        from: node.ID,
+                        to: objnode.ID,
+                        arrows: 'to',
+                        color: {
+                            color: 'blue',
+                        },
+                        smooth: {
+                            enabled: false,
+                        }
+                    });
+                }
+            },
+            initVisual: function (node) {
+                // create a network
+                var container = document.getElementById('graph-visual');
+
+                var physics = {};
+                var layout = {
+                    hierarchical: {
+                        enabled: true,
+                    },
+                };
+
+                // provide the data in the vis format
+                var data = {
+                    nodes: this.nodes,
+                    edges: this.edges,
+                };
+                var options = {
+                    physics: physics,
+                    layout: layout,
+                };
+                // initialize your network!
+                graph = new vis.Network(container, data, options);
+
+                graph.on("click", function (params) {
+                    if (params.nodes.length > 0) {
+                        nodeid = params.nodes[0];
+                        http.get('/find/' + nodeid) //TODO: fix this http thing
+                            .then(function (
+                                response) {
+                                this.updateGraphData(response.data)
+                            })
+                    }
+                });
+            }
+        }
+    })
+</script>
