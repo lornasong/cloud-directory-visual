@@ -54,12 +54,26 @@
             graph: {},
             nodes: {},
             edges: {},
-            http: {}
+            http: {},
+            reservedNodeIcons: {},
+            assignedNodeLooks: {},
+            availableNodeShapes: [],
+            availableNodeColors: [],
         },
 
         init: function () {
             this.$http.get('/find').then(function (
                 response) {
+                //node colors, shapes
+                this.reservedNodeIcons = {
+                    'user': '\uf007',
+                    'policy': '\uf15b',
+                    'index': '\uf02e',
+                }
+                this.availableNodeShapes = ['dot', 'square', 'diamond', 'hexagon', 'triangle'];
+                // https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
+                this.availableNodeColors = ['#e6194b', '#ffe119', '#4363d8', '#f58231', '#3cb44b', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#000000']
+
                 http = this.$http // TODO: fix this
                 this.nodes = new vis.DataSet([])
                 this.edges = new vis.DataSet([])
@@ -68,6 +82,69 @@
             })
         },
         methods: {
+            makeNode: function (dataNode) {
+                var facetName = dataNode.FacetName
+                if (typeof facetName === 'undefined') {
+                    facetName = "root"
+                }
+                facetName = facetName.toLowerCase();
+
+                var looks = this.assignedNodeLooks[facetName]
+
+                if (typeof looks === 'undefined') {
+                    // TODO: check index out of bounds
+                    var pickedColor = this.availableNodeColors[0]
+                    this.availableNodeColors.shift()
+
+                    // see if it's a reserve type
+                    if (facetName === 'user') {
+                        this.assignedNodeLooks[facetName] = {
+                            shape: 'icon',
+                            icon: {
+                                code: this.reservedNodeIcons['user'],
+                                color: pickedColor,
+                            }
+                        }
+                    }
+                    if (facetName === 'policy') {
+                        this.assignedNodeLooks[facetName] = {
+                            shape: 'icon',
+                            icon: {
+                                code: this.reservedNodeIcons['policy'],
+                                color: pickedColor,
+                            }
+                        }
+                    }
+                    if (facetName === 'index') {
+                        this.assignedNodeLooks[facetName] = {
+                            shape: 'icon',
+                            icon: {
+                                code: this.reservedNodeIcons['index'],
+                                color: pickedColor,
+                            }
+                        }
+                    }
+                    if (!this.reservedNodeIcons[facetName]) {
+                        // TODO: check index out of bounds
+                        var pickedShape = this.availableNodeShapes[0]
+                        this.availableNodeShapes.shift()
+
+                        this.assignedNodeLooks[facetName] = {
+                            shape: pickedShape,
+                            color: pickedColor,
+                        }
+                    }
+                }
+
+                return {
+                    id: dataNode.ID,
+                    title: this.makeTitle(dataNode),
+                    label: this.findName(dataNode),
+                    shape: this.assignedNodeLooks[facetName].shape,
+                    icon: this.assignedNodeLooks[facetName].icon,
+                    color: this.assignedNodeLooks[facetName].color,
+                }
+            },
             findName: function (node) {
                 for (var ix in node.Attributes) {
                     var attr = node.Attributes[ix];
@@ -75,7 +152,7 @@
                         return attr.Value;
                     }
                 }
-                return "Unknown";
+                return 'Unknown';
             },
             makeTitle: function (node) {
                 return node.FacetName + " ID: " + node.ID;
@@ -95,11 +172,7 @@
                 console.log(node)
 
                 if (!this.nodes.get(node.ID)) {
-                    this.nodes.add({
-                        id: node.ID,
-                        title: this.makeTitle(node),
-                        label: this.findName(node),
-                    });
+                    this.nodes.add(this.makeNode(node));
                 }
 
                 // parent relationship
@@ -112,11 +185,7 @@
                         continue;
                     }
 
-                    this.nodes.add({
-                        id: pnode.ID,
-                        title: this.makeTitle(pnode),
-                        label: this.findName(pnode),
-                    });
+                    this.nodes.add(this.makeNode(pnode));
                     this.edges.add({
                         from: pnode.ID,
                         to: node.ID,
@@ -143,11 +212,7 @@
                         continue;
                     }
 
-                    this.nodes.add({
-                        id: cnode.ID,
-                        title: this.makeTitle(cnode),
-                        label: this.findName(cnode),
-                    });
+                    this.nodes.add(this.makeNode(cnode));
                     this.edges.add({
                         from: node.ID,
                         to: cnode.ID,
@@ -174,11 +239,7 @@
                         continue;
                     }
 
-                    this.nodes.add({
-                        id: innode.ID,
-                        title: this.makeTitle(innode),
-                        label: this.findName(innode),
-                    });
+                    this.nodes.add(this.makeNode(innode));
                     this.edges.add({
                         from: innode.ID,
                         to: node.ID,
@@ -206,11 +267,7 @@
                         continue;
                     }
 
-                    this.nodes.add({
-                        id: outnode.ID,
-                        title: this.makeTitle(outnode),
-                        label: this.findName(outnode),
-                    });
+                    this.nodes.add(this.makeNode(outnode));
                     this.edges.add({
                         from: node.ID,
                         to: outnode.ID,
@@ -237,11 +294,7 @@
                         continue;
                     }
 
-                    this.nodes.add({
-                        id: policy.ID,
-                        title: this.makeTitle(policy),
-                        label: this.findName(policy),
-                    });
+                    this.nodes.add(this.makeNode(policy));
                     this.edges.add({
                         from: policy.ID,
                         to: node.ID,
@@ -263,11 +316,7 @@
                         continue;
                     }
 
-                    this.nodes.add({
-                        id: objnode.ID,
-                        title: this.makeTitle(objnode),
-                        label: this.findName(objnode),
-                    });
+                    this.nodes.add(this.makeNode(objnode));
                     this.edges.add({
                         from: node.ID,
                         to: objnode.ID,
