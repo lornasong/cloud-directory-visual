@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
-	"github.com/lornasong/aws-cloud-directory-visual/src/visual"
+	"github.com/lornasong/cloud-directory-visual/src/visual"
 )
 
 const (

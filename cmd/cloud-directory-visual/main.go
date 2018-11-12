@@ -7,9 +7,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/clouddirectory"
 	"github.com/labstack/echo"
-	"github.com/lornasong/aws-cloud-directory-visual/src/directory"
-	"github.com/lornasong/aws-cloud-directory-visual/src/handlers"
-	"github.com/lornasong/aws-cloud-directory-visual/src/visual"
+	"github.com/lornasong/cloud-directory-visual/src/directory"
+	"github.com/lornasong/cloud-directory-visual/src/handlers"
+	"github.com/lornasong/cloud-directory-visual/src/visual"
 )
 
 func main() {

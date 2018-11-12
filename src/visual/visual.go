@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/clouddirectory"
-	"github.com/lornasong/aws-cloud-directory-visual/src/directory"
+	"github.com/lornasong/cloud-directory-visual/src/directory"
 	"github.com/pkg/errors"
 )
 
