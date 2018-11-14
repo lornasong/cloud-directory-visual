@@ -41,6 +41,12 @@ func (v *Visual) Describe(id string) (*Node, error) {
 
 	if isSelector(id) {
 		id = selectorToID(id)
+	} else {
+		out, err := v.dir.GetObjectInformation(id)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to GetObjectInformation")
+		}
+		id = *out.ObjectIdentifier
 	}
 
 	out, err := v.dir.ListObjectAttributes(id)

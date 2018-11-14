@@ -23,6 +23,29 @@ func New(client Client, arn, schemaArn string) *Directory {
 	}
 }
 
+// GetObjectInformation returns a Cloud Directory's object's attributes
+func (d *Directory) GetObjectInformation(ref string) (*clouddirectory.GetObjectInformationOutput, error) {
+	id := ref
+	if !isPath(ref) {
+		id = fmt.Sprintf("$%s", id)
+	}
+
+	in := clouddirectory.GetObjectInformationInput{
+		DirectoryArn:     aws.String(d.arn),
+		ConsistencyLevel: aws.String(clouddirectory.ConsistencyLevelEventual),
+		ObjectReference: &clouddirectory.ObjectReference{
+			Selector: aws.String(id),
+		},
+	}
+
+	out, err := d.client.GetObjectInformation(&in)
+	fmt.Println(out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ListObjectAttributes returns a Cloud Directory's object's attributes
 func (d *Directory) ListObjectAttributes(ref string) (*clouddirectory.ListObjectAttributesOutput, error) {
 	id := ref
