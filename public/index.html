@@ -194,7 +194,7 @@
                         from: pnode.ID,
                         to: node.ID,
                         arrows: 'to',
-                        label: relationship.Linkname,
+                        title: relationship.Linkname,
                         color: {
                             color: 'gray',
                         },
@@ -221,7 +221,7 @@
                         from: node.ID,
                         to: cnode.ID,
                         arrows: 'to',
-                        label: relationship.Linkname,
+                        title: relationship.Linkname,
                         color: {
                             color: 'gray',
                         },
@@ -248,7 +248,7 @@
                         from: innode.ID,
                         to: node.ID,
                         arrows: 'to',
-                        label: this.makeAttributeLabel(relationship.Attributes),
+                        title: this.makeAttributeLabel(relationship.Attributes),
                         dashes: 'true',
                         color: {
                             color: 'black',
@@ -276,7 +276,7 @@
                         from: node.ID,
                         to: outnode.ID,
                         arrows: 'to',
-                        label: this.makeAttributeLabel(relationship.Attributes),
+                        title: this.makeAttributeLabel(relationship.Attributes),
                         dashes: 'true',
                         color: {
                             color: 'black',
