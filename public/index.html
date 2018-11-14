@@ -331,10 +331,15 @@
                 // create a network
                 var container = document.getElementById('graph-visual');
 
-                var physics = {};
+                var physics = {
+                    barnesHut: {
+                        avoidOverlap: 1,
+                    }
+                };
                 var layout = {
                     hierarchical: {
                         enabled: true,
+                        sortMethod: 'directed',
                     },
                 };
 
