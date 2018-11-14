@@ -188,22 +188,24 @@
                     if (!this.nodes.get(pnode.ID)) {
                         this.nodes.add(this.makeNode(pnode));
                     }
-
-                    this.edges.add({
-                        from: pnode.ID,
-                        to: node.ID,
-                        arrows: 'to',
-                        title: relationship.Linkname,
-                        color: {
-                            color: 'gray',
-                        },
-                        font: {
-                            color: 'black',
-                        },
-                        smooth: {
-                            enabled: false,
-                        }
-                    });
+                    if (!this.edges.get(pnode.ID + node.ID)) {
+                        this.edges.add({
+                            id: pnode.ID + node.ID,
+                            from: pnode.ID,
+                            to: node.ID,
+                            arrows: 'to',
+                            title: relationship.Linkname,
+                            color: {
+                                color: 'gray',
+                            },
+                            font: {
+                                color: 'black',
+                            },
+                            smooth: {
+                                enabled: false,
+                            }
+                        });
+                    }
                 }
 
                 // child relationship
@@ -215,21 +217,24 @@
                         this.nodes.add(this.makeNode(cnode));
                     }
 
-                    this.edges.add({
-                        from: node.ID,
-                        to: cnode.ID,
-                        arrows: 'to',
-                        title: relationship.Linkname,
-                        color: {
-                            color: 'gray',
-                        },
-                        font: {
-                            color: 'black',
-                        },
-                        smooth: {
-                            enabled: false,
-                        }
-                    });
+                    if (!this.edges.get(node.ID + cnode.ID)) {
+                        this.edges.add({
+                            id: node.ID + cnode.ID,
+                            from: node.ID,
+                            to: cnode.ID,
+                            arrows: 'to',
+                            title: relationship.Linkname,
+                            color: {
+                                color: 'gray',
+                            },
+                            font: {
+                                color: 'black',
+                            },
+                            smooth: {
+                                enabled: false,
+                            }
+                        });
+                    }
                 }
 
                 // incoming typed links relationship
@@ -241,22 +246,25 @@
                         this.nodes.add(this.makeNode(innode));
                     }
 
-                    this.edges.add({
-                        from: innode.ID,
-                        to: node.ID,
-                        arrows: 'to',
-                        title: this.makeAttributeLabel(relationship.Attributes),
-                        dashes: 'true',
-                        color: {
-                            color: 'black',
-                        },
-                        font: {
-                            color: 'black',
-                        },
-                        smooth: {
-                            enabled: false,
-                        }
-                    });
+                    if (!this.edges.get(innode.ID + node.ID)) {
+                        this.edges.add({
+                            id: innode.ID + node.ID,
+                            from: innode.ID,
+                            to: node.ID,
+                            arrows: 'to',
+                            title: this.makeAttributeLabel(relationship.Attributes),
+                            dashes: 'true',
+                            color: {
+                                color: 'black',
+                            },
+                            font: {
+                                color: 'black',
+                            },
+                            smooth: {
+                                enabled: false,
+                            }
+                        });
+                    }
                 }
 
                 // outgoing typed links relationship
@@ -267,22 +275,25 @@
                     if (!this.nodes.get(outnode.ID)) {
                         this.nodes.add(this.makeNode(outnode));
                     }
-                    this.edges.add({
-                        from: node.ID,
-                        to: outnode.ID,
-                        arrows: 'to',
-                        title: this.makeAttributeLabel(relationship.Attributes),
-                        dashes: 'true',
-                        color: {
-                            color: 'black',
-                        },
-                        font: {
-                            color: 'black',
-                        },
-                        smooth: {
-                            enabled: false,
-                        }
-                    });
+                    if (!this.edges.get(node.ID + outnode.ID)) {
+                        this.edges.add({
+                            id: node.ID + outnode.ID,
+                            from: node.ID,
+                            to: outnode.ID,
+                            arrows: 'to',
+                            title: this.makeAttributeLabel(relationship.Attributes),
+                            dashes: 'true',
+                            color: {
+                                color: 'black',
+                            },
+                            font: {
+                                color: 'black',
+                            },
+                            smooth: {
+                                enabled: false,
+                            }
+                        });
+                    }
                 }
 
                 // attached policies
@@ -292,18 +303,20 @@
                     if (!this.nodes.get(policy.ID)) {
                         this.nodes.add(this.makeNode(policy));
                     }
-
-                    this.edges.add({
-                        from: policy.ID,
-                        to: node.ID,
-                        arrows: 'to',
-                        color: {
-                            color: 'blue',
-                        },
-                        smooth: {
-                            enabled: false,
-                        }
-                    });
+                    if (!this.edges.get(policy.ID + node.ID)) {
+                        this.edges.add({
+                            id: policy.ID + node.ID,
+                            from: policy.ID,
+                            to: node.ID,
+                            arrows: 'to',
+                            color: {
+                                color: 'blue',
+                            },
+                            smooth: {
+                                enabled: false,
+                            }
+                        });
+                    }
                 }
 
                 // attached obj
@@ -313,18 +326,20 @@
                     if (!this.nodes.get(objnode.ID)) {
                         this.nodes.add(this.makeNode(objnode));
                     }
-
-                    this.edges.add({
-                        from: node.ID,
-                        to: objnode.ID,
-                        arrows: 'to',
-                        color: {
-                            color: 'blue',
-                        },
-                        smooth: {
-                            enabled: false,
-                        }
-                    });
+                    if (!this.edges.get(node.ID + objnode.ID)) {
+                        this.edges.add({
+                            id: node.ID + objnode.ID,
+                            from: node.ID,
+                            to: objnode.ID,
+                            arrows: 'to',
+                            color: {
+                                color: 'blue',
+                            },
+                            smooth: {
+                                enabled: false,
+                            }
+                        });
+                    }
                 }
             },
             initVisual: function (node) {
