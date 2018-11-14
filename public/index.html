@@ -185,11 +185,10 @@
 
                     var pnode = relationship.Node
 
-                    if (this.nodes.get(pnode.ID)) {
-                        continue;
+                    if (!this.nodes.get(pnode.ID)) {
+                        this.nodes.add(this.makeNode(pnode));
                     }
 
-                    this.nodes.add(this.makeNode(pnode));
                     this.edges.add({
                         from: pnode.ID,
                         to: node.ID,
@@ -212,11 +211,10 @@
                     var relationship = node.Children[ix]
                     var cnode = relationship.Node
 
-                    if (this.nodes.get(cnode.ID)) {
-                        continue;
+                    if (!this.nodes.get(cnode.ID)) {
+                        this.nodes.add(this.makeNode(cnode));
                     }
 
-                    this.nodes.add(this.makeNode(cnode));
                     this.edges.add({
                         from: node.ID,
                         to: cnode.ID,
@@ -239,11 +237,10 @@
                     var relationship = node.IncomingTypedLinks[ix]
                     var innode = relationship.Node
 
-                    if (this.nodes.get(innode.ID)) {
-                        continue;
+                    if (!this.nodes.get(innode.ID)) {
+                        this.nodes.add(this.makeNode(innode));
                     }
 
-                    this.nodes.add(this.makeNode(innode));
                     this.edges.add({
                         from: innode.ID,
                         to: node.ID,
@@ -267,11 +264,9 @@
                     var relationship = node.OutgoingTypedLinks[ix]
                     var outnode = relationship.Node
 
-                    if (this.nodes.get(outnode.ID)) {
-                        continue;
+                    if (!this.nodes.get(outnode.ID)) {
+                        this.nodes.add(this.makeNode(outnode));
                     }
-
-                    this.nodes.add(this.makeNode(outnode));
                     this.edges.add({
                         from: node.ID,
                         to: outnode.ID,
@@ -294,11 +289,10 @@
                 for (var ix in node.AttachedPolicies) {
                     var policy = node.AttachedPolicies[ix].Node
 
-                    if (this.nodes.get(policy.ID)) {
-                        continue;
+                    if (!this.nodes.get(policy.ID)) {
+                        this.nodes.add(this.makeNode(policy));
                     }
 
-                    this.nodes.add(this.makeNode(policy));
                     this.edges.add({
                         from: policy.ID,
                         to: node.ID,
@@ -316,11 +310,10 @@
                 for (var ix in node.AttachedObjects) {
                     var objnode = node.AttachedObjects[ix].Node
 
-                    if (this.nodes.get(objnode.ID)) {
-                        continue;
+                    if (!this.nodes.get(objnode.ID)) {
+                        this.nodes.add(this.makeNode(objnode));
                     }
 
-                    this.nodes.add(this.makeNode(objnode));
                     this.edges.add({
                         from: node.ID,
                         to: objnode.ID,
