@@ -72,7 +72,11 @@
                 }
                 this.availableNodeShapes = ['dot', 'square', 'diamond', 'hexagon', 'triangle'];
                 // https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
-                this.availableNodeColors = ['#e6194b', '#ffe119', '#4363d8', '#f58231', '#3cb44b', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#000000']
+                this.availableNodeColors = ['#e6194b', '#ffe119', '#4363d8', '#f58231', '#3cb44b',
+                    '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff',
+                    '#9a6324', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080',
+                    '#000000'
+                ]
 
                 http = this.$http // TODO: fix this
                 this.nodes = new vis.DataSet([])
