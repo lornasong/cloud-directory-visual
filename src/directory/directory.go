@@ -39,7 +39,6 @@ func (d *Directory) GetObjectInformation(ref string) (*clouddirectory.GetObjectI
 	}
 
 	out, err := d.client.GetObjectInformation(&in)
-	fmt.Println(out)
 	if err != nil {
 		return nil, err
 	}
